@@ -2,7 +2,6 @@ package com.artesecor.api_gestaoclientes.application.dto;
 
 import com.artesecor.api_gestaoclientes.domain.model.Cliente;
 import com.artesecor.api_gestaoclientes.domain.model.enums.ClienteStatus;
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

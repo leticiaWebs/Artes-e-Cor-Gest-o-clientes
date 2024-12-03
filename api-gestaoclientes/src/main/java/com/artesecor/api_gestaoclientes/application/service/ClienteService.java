@@ -6,7 +6,6 @@ import com.artesecor.api_gestaoclientes.delivery.handler.DuplicateResourceExcept
 import com.artesecor.api_gestaoclientes.delivery.handler.ResourceNotFoundException;
 import com.artesecor.api_gestaoclientes.domain.model.Cliente;
 import com.artesecor.api_gestaoclientes.infrastructure.repository.ClienteRepository;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
