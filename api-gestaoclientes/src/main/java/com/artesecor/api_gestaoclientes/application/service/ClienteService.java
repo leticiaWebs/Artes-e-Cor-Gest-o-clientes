@@ -44,14 +44,14 @@ public class ClienteService {
     }
 
     @Transactional
-    public ClienteDTO findById(String id) {
+    public ClienteDTO findById(Long id) {
         Optional<Cliente> obj = repository.findById(id);
         Cliente entity = obj.orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
         return new ClienteDTO(entity);
     }
 
     @Transactional
-    public ClienteDTO update(String id, ClienteDTO dto) {
+    public ClienteDTO update(Long id, ClienteDTO dto) {
         try {
             Cliente entity = repository.getReferenceById(id);
             entity.setStatus(dto.getStatus());
@@ -64,7 +64,7 @@ public class ClienteService {
         }
     }
 
-    public void delete(String id){
+    public void delete(Long id){
         try{
             repository.deleteById(id);
         } catch(EmptyResultDataAccessException e){

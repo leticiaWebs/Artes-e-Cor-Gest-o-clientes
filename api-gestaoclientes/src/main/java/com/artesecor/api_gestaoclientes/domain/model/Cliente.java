@@ -15,8 +15,8 @@ import lombok.Setter;
 @Table(name = "tb_cliente")
 public class Cliente {
     @Id
-    @GeneratedValue(strategy =  GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     public String nome;
     private String contato;
     @Enumerated(EnumType.STRING)

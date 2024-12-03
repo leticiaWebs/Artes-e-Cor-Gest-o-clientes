@@ -3,99 +3,146 @@ package com.artesecor.api_gestaoclientes.delivery.controller;
 import com.artesecor.api_gestaoclientes.application.dto.ClienteDTO;
 import com.artesecor.api_gestaoclientes.application.service.ClienteService;
 import com.artesecor.api_gestaoclientes.domain.model.enums.ClienteStatus;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
-
-
+@SpringBootTest
+@AutoConfigureMockMvc
 public class ClienteControllerTest {
-    @InjectMocks
-    private ClienteController controller;
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
     private ClienteService service;
 
     private ClienteDTO clienteDTO;
 
-    private List<ClienteDTO> clienteDTOList;
-
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        clienteDTO = new ClienteDTO("123e4567-e89b-12d3-a456-426614174000", "João Silva", "joao@teste.com", ClienteStatus.ATIVO);
-        clienteDTOList = Arrays.asList(
-                new ClienteDTO("123e4567-e89b-12d3-a456-426614174000", "João Silva", "joao@teste.com", ClienteStatus.ATIVO),
-                new ClienteDTO("223e4567-e89b-12d3-a456-426614174001", "Maria Souza", "maria@teste.com", ClienteStatus.INATIVO)
-        );
+        clienteDTO = new ClienteDTO(1L, "Cliente 1", "1234", ClienteStatus.ATIVO);
     }
 
     @Test
-    void findAll_shouldReturnListOfClientes() {
-        when(service.findAll()).thenReturn(clienteDTOList);
+    void testFindAll() throws Exception {
+        // Preparar o cenário
+        when(service.findAll()).thenReturn(List.of(clienteDTO));
 
-        ResponseEntity<List<ClienteDTO>> response = controller.findAll();
+        // Chamar o endpoint
+        mockMvc.perform(MockMvcRequestBuilders.get("/clientes")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(clienteDTO.getId()))
+                .andExpect(jsonPath("$[0].nome").value(clienteDTO.getNome()))
+                .andExpect(jsonPath("$[0].contato").value(clienteDTO.getContato()))
+                .andExpect(jsonPath("$[0].status").value(clienteDTO.getStatus().toString()));
 
-        assertNotNull(response);
-        assertEquals("Status Code", 200, response.getStatusCodeValue());
-        assertEquals("Tamanho da lista", 2, response.getBody().size());
+        // Verificar se o método foi chamado
         verify(service, times(1)).findAll();
     }
 
     @Test
-    void findById_shouldReturnClienteDTO_whenIdExists() {
-        when(service.findById("123e4567-e89b-12d3-a456-426614174000")).thenReturn(clienteDTO);
+    void testFindById() throws Exception {
+        // Preparar o cenário
+        when(service.findById(1L)).thenReturn(clienteDTO);
 
-        ResponseEntity<ClienteDTO> response = controller.findById("123e4567-e89b-12d3-a456-426614174000");
+        // Chamar o endpoint
+        mockMvc.perform(MockMvcRequestBuilders.get("/clientes/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(clienteDTO.getId()))
+                .andExpect(jsonPath("$.nome").value(clienteDTO.getNome()))
+                .andExpect(jsonPath("$.contato").value(clienteDTO.getContato()))
+                .andExpect(jsonPath("$.status").value(clienteDTO.getStatus().toString()));
 
-        assertNotNull(response);
-        assertEquals("Status Code", 200, response.getStatusCodeValue());
-        assertEquals("Nome do Cliente", "João Silva", response.getBody().getNome());
-        verify(service, times(1)).findById("123e4567-e89b-12d3-a456-426614174000");
+        // Verificar se o método foi chamado
+        verify(service, times(1)).findById(1L);
     }
 
     @Test
-    void update_shouldUpdateClienteAndReturnUpdatedDTO() {
-        when(service.update(eq("123e4567-e89b-12d3-a456-426614174000"), any(ClienteDTO.class))).thenReturn(clienteDTO);
+    void testInsert() throws Exception {
+        // Preparar o cenário
+        when(service.insert(Mockito.any(ClienteDTO.class))).thenReturn(clienteDTO);
 
-        ResponseEntity<ClienteDTO> response = controller.update("123e4567-e89b-12d3-a456-426614174000", clienteDTO);
+        // Chamar o endpoint
+        mockMvc.perform(MockMvcRequestBuilders.post("/clientes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(clienteDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/clientes/1"))
+                .andExpect(jsonPath("$.id").value(clienteDTO.getId()))
+                .andExpect(jsonPath("$.nome").value(clienteDTO.getNome()))
+                .andExpect(jsonPath("$.contato").value(clienteDTO.getContato()))
+                .andExpect(jsonPath("$.status").value(clienteDTO.getStatus().toString()));
 
-        assertNotNull(response);
-        assertEquals("Status Code", 200, response.getStatusCodeValue());
-        assertEquals("Nome do Cliente", "João Silva", response.getBody().getNome());
-        verify(service, times(1)).update(eq("123e4567-e89b-12d3-a456-426614174000"), any(ClienteDTO.class));
-    }
-    @Test
-    void insert_shouldCreateClienteAndReturnLocationHeader() {
-        when(service.insert(any(ClienteDTO.class))).thenReturn(clienteDTO);
-
-        ResponseEntity<ClienteDTO> response = controller.insert(clienteDTO);
-
-        assertNotNull(response);
-        assertEquals("Status Code", 201, response.getStatusCodeValue());
-        assertNotNull("URI do Cliente", String.valueOf(response.getHeaders().getLocation()));
-        assertEquals("Nome do Cliente", "João Silva", response.getBody().getNome());
-        verify(service, times(1)).insert(clienteDTO);
+        // Verificar se o método foi chamado
+        verify(service, times(1)).insert(Mockito.any(ClienteDTO.class));
     }
 
     @Test
-    void delete_shouldDeleteClienteAndReturnNoContent() {
-        doNothing().when(service).delete("123e4567-e89b-12d3-a456-426614174000");
+    void testUpdate() throws Exception {
+        // Preparar o cenário
+        when(service.update(eq(1L), Mockito.any(ClienteDTO.class))).thenReturn(clienteDTO);
 
-        ResponseEntity<ClienteDTO> response = controller.delete("123e4567-e89b-12d3-a456-426614174000");
+        // Chamar o endpoint
+        mockMvc.perform(MockMvcRequestBuilders.put("/clientes/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(clienteDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(clienteDTO.getId()))
+                .andExpect(jsonPath("$.nome").value(clienteDTO.getNome()))
+                .andExpect(jsonPath("$.contato").value(clienteDTO.getContato()))
+                .andExpect(jsonPath("$.status").value(clienteDTO.getStatus().toString()));
 
-        assertNotNull(response);
-        assertEquals("Status Code", 204, response.getStatusCodeValue());
-        verify(service, times(1)).delete("123e4567-e89b-12d3-a456-426614174000");
+        // Verificar se o método foi chamado
+        verify(service, times(1)).update(eq(1L), Mockito.any(ClienteDTO.class));
     }
+
+    @Test
+    void testDelete() throws Exception {
+        // Preparar o cenário
+        doNothing().when(service).delete(1L);
+
+        // Chamar o endpoint
+        mockMvc.perform(MockMvcRequestBuilders.delete("/clientes/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        // Verificar se o método foi chamado
+        verify(service, times(1)).delete(1L);
+    }
+
+    // Método auxiliar para converter objeto em JSON
+    public static String asJsonString(Object obj) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

@@ -2,6 +2,7 @@ package com.artesecor.api_gestaoclientes.application.dto;
 
 import com.artesecor.api_gestaoclientes.domain.model.Cliente;
 import com.artesecor.api_gestaoclientes.domain.model.enums.ClienteStatus;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,12 +14,13 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class ClienteDTO implements Serializable {
 
-    private String id;
+
+    private Long id;
     private String nome;
     private String contato;
     private ClienteStatus status;
 
-    public ClienteDTO(String id, String nome, String contato, ClienteStatus status){
+    public ClienteDTO(Long id, String nome, String contato, ClienteStatus status){
         this.id = id;
         this.nome = nome;
         this.contato = contato;
